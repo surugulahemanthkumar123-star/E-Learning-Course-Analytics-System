@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block page_subtitle %}
+<p class="page-subtitle">Define, search, and maintain academic courses and learning categories.</p>
+{% endblock %}
+
+{% block header_actions %}
+<button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalCourse" id="btnOpenAddCourse">
+    <i class="bi bi-plus-lg me-1"></i> Add Course
+</button>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-card">
+    <div class="analytics-card-header">
+        <div class="d-flex align-items-center gap-2">
+            <h5 class="analytics-card-title">
+                <i class="bi bi-journal-bookmark text-primary"></i> Course Catalog
+            </h5>
+            <span class="badge bg-light text-muted border" id="courseTotalBadge">0 courses</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <div class="input-group input-group-sm" style="max-width: 280px;">
+                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" id="courseSearchInput" class="form-control border-start-0" placeholder="Search by name or category...">
+            </div>
+        </div>
+    </div>
+    <div class="analytics-card-body p-0">
+        <div class="table-responsive">
+            <table class="table custom-table table-hover align-middle mb-0" id="tableCourses">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">ID</th>
+                        <th>Course Name</th>
+                        <th>Category</th>
+                        <th class="text-center">Active Enrollments</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyCourses">
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">
+                            <span class="spinner-border spinner-border-sm me-2"></span> Loading courses...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add / Edit Course -->
+<div class="modal fade" id="modalCourse" tabindex="-1" aria-labelledby="modalCourseTitle" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="formCourse">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCourseTitle">Add New Course</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="courseId" value="">
+                    
+                    <div class="mb-3">
+                        <label for="courseName" class="form-label fw-semibold">Course Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="courseName" required placeholder="e.g., Full-Stack Web Development with Python" maxlength="100">
+                        <div class="form-text">Course title displayed to learners and in analytical reports.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="courseCategory" class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="courseCategory" required placeholder="e.g., Computer Science, Data Science, Web Development" maxlength="50" list="categorySuggestions">
+                        <datalist id="categorySuggestions">
+                            <option value="Computer Science">
+                            <option value="Web Development">
+                            <option value="Data Science">
+                            <option value="Databases">
+                            <option value="Cloud & DevOps">
+                            <option value="Mobile Development">
+                            <option value="Cybersecurity">
+                        </datalist>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm" id="btnSaveCourse">
+                        <i class="bi bi-check2 me-1"></i> Save Course
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Confirm Delete -->
+<div class="modal fade" id="modalDeleteCourse" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-danger"><i class="bi bi-trash3-fill me-2"></i>Delete Course</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete course <strong id="deleteCourseName"></strong>?</p>
+                <p class="text-muted small mb-0">Note: Deletion will be rejected if students are actively enrolled in this course.</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger btn-sm" id="btnConfirmDeleteCourse">
+                    <i class="bi bi-trash3 me-1"></i> Confirm Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/courses.js') }}?v=4.0"></script>
+{% endblock %}

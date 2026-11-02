@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="{{ active_theme }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - E-Learning Course Analytics System</title>
+
+    <!-- Immediate Server-Locked Theme Injection -->
+    <script>
+        (function() {
+            var serverTheme = '{{ active_theme }}';
+            document.documentElement.setAttribute('data-theme', serverTheme);
+        })();
+    </script>
+
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Custom Modern UI CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=6.0">
+</head>
+<body>
+    <div class="auth-wrapper">
+        <!-- Top Right Theme Switcher -->
+        <div class="auth-nav-top">
+            <button class="theme-switch-btn shadow-sm" id="btnThemeToggle" title="Switch Theme (Dark / Light)">
+                <i class="bi {% if active_theme == 'dark' %}bi-moon-stars-fill{% else %}bi-sun-fill{% endif %} text-warning" id="themeIcon"></i>
+                <span id="themeText">{{ 'Dark' if active_theme == 'dark' else 'Light' }}</span>
+            </button>
+        </div>
+
+        <div class="auth-box auth-box-wide">
+            <!-- Brand Header -->
+            <div class="auth-brand">
+                <div class="brand-icon-lg">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <h1 class="auth-title">EduAnalytics</h1>
+                <p class="auth-subtitle">E-Learning Course Analytics &amp; Student Inactivity Monitoring</p>
+            </div>
+
+            <!-- Registration Card -->
+            <div class="auth-card">
+                <h4 class="fw-bold text-navy mb-1">Create an Account</h4>
+                <p class="text-muted small mb-3">Register to manage course data, track student enrollments, and analyze early warnings.</p>
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    <div class="mb-3">
+                      {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category in ['error', 'danger'] else category }} alert-dismissible fade show small d-flex align-items-center gap-2 py-2" role="alert">
+                          <i class="bi {% if category == 'success' %}bi-check-circle-fill text-success{% else %}bi-exclamation-circle-fill text-danger{% endif %} fs-5"></i>
+                          <div>{{ message }}</div>
+                          <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                {% endwith %}
+
+                <!-- Registration Form -->
+                <form action="/register" method="POST" id="formRegister">
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="fullNameInput" class="form-label small fw-semibold">Full Name <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted">
+                                    <i class="bi bi-person-badge"></i>
+                                </span>
+                                <input type="text" class="form-control border-start-0 ps-0" id="fullNameInput" name="full_name" required placeholder="e.g., Dr. Rajesh Kumar" value="{{ request.form.get('full_name', '') }}" maxlength="100">
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="usernameInput" class="form-label small fw-semibold">Username <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted">
+                                    <i class="bi bi-at"></i>
+                                </span>
+                                <input type="text" class="form-control border-start-0 ps-0" id="usernameInput" name="username" required placeholder="e.g., rkumar" value="{{ request.form.get('username', '') }}" maxlength="50" pattern="[A-Za-z0-9_]{3,30}" title="3-30 alphanumeric characters or underscores">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-7">
+                            <label for="emailInput" class="form-label small fw-semibold">Institutional Email <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted">
+                                    <i class="bi bi-envelope"></i>
+                                </span>
+                                <input type="email" class="form-control border-start-0 ps-0" id="emailInput" name="email" required placeholder="rajesh@college.edu" value="{{ request.form.get('email', '') }}" maxlength="100">
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-5">
+                            <label for="roleSelect" class="form-label small fw-semibold">Platform Role</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted">
+                                    <i class="bi bi-shield-lock"></i>
+                                </span>
+                                <select class="form-select border-start-0 ps-0" id="roleSelect" name="role">
+                                    <option value="Admin" selected>Administrator</option>
+                                    <option value="Academic Analyst">Academic Analyst</option>
+                                    <option value="Instructor">Instructor</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="passwordInput" class="form-label small fw-semibold">Password <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted">
+                                    <i class="bi bi-lock"></i>
+                                </span>
+                                <input type="password" class="form-control border-start-0 border-end-0 ps-0" id="passwordInput" name="password" required placeholder="Min. 6 chars" minlength="6" autocomplete="new-password">
+                                <button type="button" class="password-toggle-btn" id="togglePasswordBtn" title="Show / Hide Password">
+                                    <i class="bi bi-eye" id="passwordEyeIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="confirmPasswordInput" class="form-label small fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted">
+                                    <i class="bi bi-lock-fill"></i>
+                                </span>
+                                <input type="password" class="form-control border-start-0 border-end-0 ps-0" id="confirmPasswordInput" name="confirm_password" required placeholder="Repeat password" minlength="6" autocomplete="new-password">
+                                <button type="button" class="password-toggle-btn" id="toggleConfirmBtn" title="Show / Hide Password">
+                                    <i class="bi bi-eye" id="confirmEyeIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Password Match Helper -->
+                    <div id="passwordMatchAlert" class="small mb-3 d-none"></div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="termsCheck" required checked>
+                        <label class="form-check-label small text-muted" for="termsCheck">
+                            I accept the academic analytics data governance and privacy policies.
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" id="btnSubmitRegister">
+                        <i class="bi bi-check2-circle me-2"></i> Complete Registration
+                    </button>
+                </form>
+
+                <div class="auth-divider">already have an account?</div>
+
+                <div class="text-center">
+                    <a href="/login" class="btn btn-outline-secondary w-100 py-2 small fw-semibold">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to Existing Account
+                    </a>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="auth-footer">
+                <div>Already registered? <a href="/login">Sign In Here</a></div>
+                <div class="mt-2 text-muted" style="font-size: 0.78rem;">
+                    E-Learning Course Analytics System &bull; Secure MySQL Storage &bull; Werkzeug Encryption
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Password Visibility Toggles
+        function setupToggle(btnId, inputId, iconId) {
+            const btn = document.getElementById(btnId);
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (btn && input && icon) {
+                btn.addEventListener('click', () => {
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.className = 'bi bi-eye-slash text-primary';
+                    } else {
+                        input.type = 'password';
+                        icon.className = 'bi bi-eye';
+                    }
+                });
+            }
+        }
+        setupToggle('togglePasswordBtn', 'passwordInput', 'passwordEyeIcon');
+        setupToggle('toggleConfirmBtn', 'confirmPasswordInput', 'confirmEyeIcon');
+
+        // Live Password Match Checker
+        const pwd = document.getElementById('passwordInput');
+        const cpwd = document.getElementById('confirmPasswordInput');
+        const matchAlert = document.getElementById('passwordMatchAlert');
+
+        function checkMatch() {
+            if (!pwd || !cpwd || !matchAlert) return;
+            if (cpwd.value.length === 0) {
+                matchAlert.className = 'small mb-3 d-none';
+                return;
+            }
+            if (pwd.value === cpwd.value) {
+                matchAlert.className = 'small mb-3 text-success d-flex align-items-center gap-1';
+                matchAlert.innerHTML = '<i class="bi bi-check-circle-fill"></i> Passwords match!';
+            } else {
+                matchAlert.className = 'small mb-3 text-danger d-flex align-items-center gap-1';
+                matchAlert.innerHTML = '<i class="bi bi-x-circle-fill"></i> Passwords do not match.';
+            }
+        }
+        pwd?.addEventListener('input', checkMatch);
+        cpwd?.addEventListener('input', checkMatch);
+
+        // Theme Switcher Logic with Server Persistence
+        const themeToggleBtn = document.getElementById('btnThemeToggle');
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                const current = document.documentElement.getAttribute('data-theme') || 'light';
+                const next = current === 'dark' ? 'light' : 'dark';
+                
+                document.documentElement.setAttribute('data-theme', next);
+                try { localStorage.setItem('eduTheme', next); } catch(e) {}
+                try { document.cookie = 'eduTheme=' + next + '; path=/; max-age=31536000; SameSite=Lax'; } catch(e) {}
+
+                const icon = document.getElementById('themeIcon');
+                const text = document.getElementById('themeText');
+                if (icon && text) {
+                    if (next === 'dark') {
+                        icon.className = 'bi bi-moon-stars-fill text-warning';
+                        text.textContent = 'Dark';
+                    } else {
+                        icon.className = 'bi bi-sun-fill text-warning';
+                        text.textContent = 'Light';
+                    }
+                }
+
+                // Sync server
+                fetch('/api/settings/theme', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ theme: next })
+                }).catch(() => {});
+            });
+        }
+
+        // Form submit handler
+        const formRegister = document.getElementById('formRegister');
+        const btnSubmit = document.getElementById('btnSubmitRegister');
+        if (formRegister && btnSubmit) {
+            formRegister.addEventListener('submit', (e) => {
+                if (pwd.value !== cpwd.value) {
+                    e.preventDefault();
+                    alert('Passwords do not match. Please verify your passwords.');
+                    cpwd.focus();
+                    return;
+                }
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Creating Account...';
+            });
+        }
+    </script>
+</body>
+</html>

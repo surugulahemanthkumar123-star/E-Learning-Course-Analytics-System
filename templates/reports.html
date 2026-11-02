@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block page_subtitle %}
+<p class="page-subtitle">Export official CSV analytics reports and generate publication-ready Matplotlib figures.</p>
+{% endblock %}
+
+{% block header_actions %}
+<button class="btn btn-primary btn-sm" id="btnGenerateMatplotlib">
+    <i class="bi bi-file-image me-1"></i> Generate Backend Matplotlib Charts
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- Generated Matplotlib Visualizations Banner -->
+<div id="chartGenerationContainer" class="mb-4 d-none">
+    <div class="analytics-card border-primary">
+        <div class="analytics-card-header bg-primary-subtle text-primary">
+            <h5 class="analytics-card-title mb-0">
+                <i class="bi bi-images"></i> Matplotlib Generated Figures
+            </h5>
+            <small id="chartTimestamp" class="text-muted"></small>
+        </div>
+        <div class="analytics-card-body">
+            <div class="row g-3">
+                <div class="col-12 col-lg-6 text-center">
+                    <h6 class="fw-bold mb-2">Figure 1: Course Completion Distribution</h6>
+                    <img id="imgCompletionChart" class="img-fluid rounded border shadow-sm" alt="Course Completion Bar Chart">
+                </div>
+                <div class="col-12 col-lg-6 text-center">
+                    <h6 class="fw-bold mb-2">Figure 2: Weekly Activity Chronological Trend</h6>
+                    <img id="imgWeeklyChart" class="img-fluid rounded border shadow-sm" alt="Weekly Activity Trend Line Chart">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reports Navigation Tabs -->
+<div class="analytics-card">
+    <div class="analytics-card-header p-2">
+        <ul class="nav nav-pills" id="reportsTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tab-completion" data-bs-toggle="pill" data-bs-target="#content-completion" type="button" role="tab">
+                    <i class="bi bi-bar-chart me-1"></i> Course Completion
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-comparison" data-bs-toggle="pill" data-bs-target="#content-comparison" type="button" role="tab">
+                    <i class="bi bi-table me-1"></i> Course Comparison
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-weekly" data-bs-toggle="pill" data-bs-target="#content-weekly" type="button" role="tab">
+                    <i class="bi bi-calendar3 me-1"></i> Weekly Activity
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-inactive" data-bs-toggle="pill" data-bs-target="#content-inactive" type="button" role="tab">
+                    <i class="bi bi-clock-history me-1"></i> Inactive Enrollments
+                </button>
+            </li>
+        </ul>
+    </div>
+    <div class="analytics-card-body">
+        <div class="tab-content" id="reportsTabContent">
+            
+            <!-- 1. Course Completion Tab -->
+            <div class="tab-pane fade show active" id="content-completion" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-navy">Course Completion Rates &amp; Enrollment Distribution</h6>
+                        <small class="text-muted">Formula: (Completed Enrollments / Total Enrollments) &times; 100</small>
+                    </div>
+                    <a href="/api/reports/course-completion.csv" class="btn btn-success btn-sm">
+                        <i class="bi bi-download me-1"></i> Export to CSV
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table custom-table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th>Category</th>
+                                <th class="text-center">Total Enrolled</th>
+                                <th class="text-center">Completed</th>
+                                <th class="text-center">In Progress</th>
+                                <th>Completion Rate</th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyReportCompletion">
+                            <tr><td colspan="7" class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Loading report...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 2. Course Comparison Tab -->
+            <div class="tab-pane fade" id="content-comparison" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-navy">Comprehensive Course Performance Comparison</h6>
+                        <small class="text-muted">Calculates total activity volume and student engagement intensity.</small>
+                    </div>
+                    <a href="/api/reports/course-comparison.csv" class="btn btn-success btn-sm">
+                        <i class="bi bi-download me-1"></i> Export to CSV
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table custom-table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Course Name</th>
+                                <th>Category</th>
+                                <th class="text-center">Enrollments</th>
+                                <th class="text-center">Completed</th>
+                                <th class="text-center">Total Activities</th>
+                                <th class="text-center">Avg Act / Student</th>
+                                <th class="text-center">Completion Rate</th>
+                                <th class="text-center">Benchmark</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyReportComparison">
+                            <tr><td colspan="8" class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Loading report...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. Weekly Activity Tab -->
+            <div class="tab-pane fade" id="content-weekly" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-navy">Weekly Activity Grouping &amp; Submissions</h6>
+                        <small class="text-muted">Grouped chronologically by calendar week using Pandas.</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="date" id="reportWeeklyStart" class="form-control form-control-sm" style="width: 135px;" title="Filter Start Date">
+                        <input type="date" id="reportWeeklyEnd" class="form-control form-control-sm" style="width: 135px;" title="Filter End Date">
+                        <button class="btn btn-outline-secondary btn-sm" id="btnFilterWeeklyReport"><i class="bi bi-funnel"></i></button>
+                        <a href="/api/reports/weekly-activity.csv" id="btnExportWeeklyCsv" class="btn btn-success btn-sm">
+                            <i class="bi bi-download me-1"></i> Export to CSV
+                        </a>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table custom-table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Calendar Week</th>
+                                <th>ISO Week</th>
+                                <th>Start Date</th>
+                                <th class="text-center">Total Activities</th>
+                                <th class="text-center">Completed</th>
+                                <th class="text-center">Incomplete</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyReportWeekly">
+                            <tr><td colspan="6" class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Loading report...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 4. Inactive Enrollments Tab -->
+            <div class="tab-pane fade" id="content-inactive" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-navy">Inactive Enrollments Audit Report</h6>
+                        <small class="text-muted">Identifies uncompleted enrollments with no activity or &gt;14 days inactivity.</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="small text-muted mb-0">Threshold:</label>
+                        <input type="number" id="reportInactiveThreshold" class="form-control form-control-sm" style="width: 75px;" value="14" min="1" max="365">
+                        <button class="btn btn-outline-secondary btn-sm" id="btnFilterInactiveReport">Apply</button>
+                        <a href="/api/reports/inactive-enrollments.csv" id="btnExportInactiveCsv" class="btn btn-success btn-sm">
+                            <i class="bi bi-download me-1"></i> Export to CSV
+                        </a>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table custom-table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Roll Number</th>
+                                <th>Course Name</th>
+                                <th>Category</th>
+                                <th>Enrolled Date</th>
+                                <th>Last Active Date</th>
+                                <th class="text-center">Days Inactive</th>
+                                <th>Status</th>
+                                <th>Inactivity Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyReportInactive">
+                            <tr><td colspan="8" class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Loading report...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/reports.js') }}?v=4.0"></script>
+{% endblock %}

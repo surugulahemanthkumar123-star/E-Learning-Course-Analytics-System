@@ -1,0 +1,447 @@
+{% extends "base.html" %}
+
+{% block page_subtitle %}
+<p class="page-subtitle">Central academic command center, institutional cohort metrics, and direct platform access.</p>
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex align-items-center gap-2">
+    <a href="/dashboard" class="btn btn-primary btn-sm">
+        <i class="bi bi-speedometer2 me-1"></i> Open Dashboard
+    </a>
+    <a href="/reports" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-file-earmark-bar-graph me-1"></i> Reports
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- 1. Hero Welcome Card -->
+<div class="home-hero-card mb-4">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                    <i class="bi bi-mortarboard-fill me-1"></i> Academic Analytics Platform
+                </span>
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                    <i class="bi bi-check-circle-fill me-1"></i> System Online
+                </span>
+            </div>
+            <h2 class="fw-bold mb-2 text-navy">
+                Welcome back, <span class="text-primary">{{ current_user.full_name or current_user.username }}</span>!
+            </h2>
+            <p class="text-muted mb-4 lead fs-6">
+                Welcome to the <strong>E-Learning Course Analytics System</strong>. Access real-time student telemetry, course completion trajectories, weekly engagement trends, and inactive enrollment interventions from your central dashboard.
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="/dashboard" class="btn btn-primary px-3 py-2 fw-semibold shadow-sm">
+                    <i class="bi bi-speedometer2 me-2"></i>Launch Analytics Dashboard
+                </a>
+                <a href="/learners" class="btn btn-outline-primary px-3 py-2 fw-semibold">
+                    <i class="bi bi-people me-2"></i>Learner Directory
+                </a>
+                <a href="/courses" class="btn btn-outline-secondary px-3 py-2">
+                    <i class="bi bi-journal-bookmark me-2"></i>Course Catalog
+                </a>
+                <a href="/reports" class="btn btn-outline-secondary px-3 py-2">
+                    <i class="bi bi-bar-chart-line me-2"></i>Export Reports
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-4 d-none d-lg-block text-center">
+            <div class="p-3">
+                <div class="display-1 text-primary opacity-75 mb-2">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div class="badge bg-light text-navy border px-3 py-2 shadow-sm">
+                    <i class="bi bi-shield-check text-success me-1"></i>
+                    Role: <strong>{{ current_user.role or 'Administrator' }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Live Executive KPI Snapshot -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-xl-2">
+        <a href="/courses" class="text-decoration-none">
+            <div class="metric-card blue">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="metric-label">Active Courses</div>
+                        <div class="metric-value">{{ summary.total_courses }}</div>
+                    </div>
+                    <div class="icon-wrapper">
+                        <i class="bi bi-journal-bookmark"></i>
+                    </div>
+                </div>
+                <div class="metric-trend text-primary">
+                    <i class="bi bi-arrow-right-circle"></i> Browse catalog
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+        <a href="/learners" class="text-decoration-none">
+            <div class="metric-card purple">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="metric-label">Total Learners</div>
+                        <div class="metric-value">{{ summary.total_learners }}</div>
+                    </div>
+                    <div class="icon-wrapper">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+                <div class="metric-trend" style="color: #7c3aed;">
+                    <i class="bi bi-person-badge"></i> Enrolled pool
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+        <a href="/enrollments" class="text-decoration-none">
+            <div class="metric-card emerald">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="metric-label">Enrollments</div>
+                        <div class="metric-value">{{ summary.total_enrollments }}</div>
+                    </div>
+                    <div class="icon-wrapper">
+                        <i class="bi bi-mortarboard"></i>
+                    </div>
+                </div>
+                <div class="metric-trend text-success">
+                    <i class="bi bi-arrow-repeat"></i> Active seats
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+        <a href="/dashboard" class="text-decoration-none">
+            <div class="metric-card green">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="metric-label">Completed</div>
+                        <div class="metric-value">{{ summary.completed_enrollments }}</div>
+                    </div>
+                    <div class="icon-wrapper">
+                        <i class="bi bi-award"></i>
+                    </div>
+                </div>
+                <div class="metric-trend text-success">
+                    <i class="bi bi-trophy"></i> {{ summary.in_progress_enrollments }} in progress
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+        <a href="/dashboard" class="text-decoration-none">
+            <div class="metric-card amber">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="metric-label">Completion Rate</div>
+                        <div class="metric-value">{{ summary.overall_completion_rate }}%</div>
+                    </div>
+                    <div class="icon-wrapper">
+                        <i class="bi bi-pie-chart"></i>
+                    </div>
+                </div>
+                <div class="metric-trend text-warning">
+                    <i class="bi bi-graph-up"></i> Platform-wide
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+        <a href="/dashboard#inactiveSection" class="text-decoration-none">
+            <div class="metric-card rose">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="metric-label">Inactive Alerts</div>
+                        <div class="metric-value">{{ summary.inactive_enrollments }}</div>
+                    </div>
+                    <div class="icon-wrapper">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                </div>
+                <div class="metric-trend text-danger">
+                    <i class="bi bi-bell"></i> Need review
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- 3. Core Modules Quick-Access Grid -->
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+        <h4 class="fw-bold mb-0 text-navy">System Modules &amp; Navigation</h4>
+        <small class="text-muted">Direct access to core academic tracking and analytical subsystems</small>
+    </div>
+    <a href="/dashboard" class="btn btn-sm btn-outline-primary">
+        Go to Visual Dashboard <i class="bi bi-arrow-right ms-1"></i>
+    </a>
+</div>
+
+<div class="row g-3 mb-4">
+    <!-- Module 1: Analytics Dashboard -->
+    <div class="col-12 col-md-6 col-xl-4">
+        <div class="home-module-card">
+            <div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="home-module-icon bg-primary-subtle text-primary">
+                        <i class="bi bi-speedometer2"></i>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Core BI</span>
+                </div>
+                <h5 class="home-module-title">Analytics &amp; BI Dashboard</h5>
+                <p class="home-module-desc">
+                    Explore visual completion charts, weekly activity heatmaps, subject performance comparisons, and inactive student detection.
+                </p>
+            </div>
+            <a href="/dashboard" class="btn btn-primary btn-sm w-100 mt-3 fw-semibold">
+                Launch Dashboard <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Module 2: Learner Directory -->
+    <div class="col-12 col-md-6 col-xl-4">
+        <div class="home-module-card">
+            <div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="home-module-icon bg-info-subtle text-info">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <span class="badge bg-info-subtle text-info border border-info-subtle">Roster</span>
+                </div>
+                <h5 class="home-module-title">Learner Management</h5>
+                <p class="home-module-desc">
+                    Manage student roster profiles, register new learners, track enrollment records, view contact details, and update profiles.
+                </p>
+            </div>
+            <a href="/learners" class="btn btn-outline-primary btn-sm w-100 mt-3 fw-semibold">
+                Open Learner Directory <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Module 3: Course Catalog -->
+    <div class="col-12 col-md-6 col-xl-4">
+        <div class="home-module-card">
+            <div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="home-module-icon bg-success-subtle text-success">
+                        <i class="bi bi-journal-bookmark-fill"></i>
+                    </div>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle">Curriculum</span>
+                </div>
+                <h5 class="home-module-title">Course Management</h5>
+                <p class="home-module-desc">
+                    Maintain the academic course catalog, create new courses, assign curriculum categories, and inspect total enrolled learner density per course.
+                </p>
+            </div>
+            <a href="/courses" class="btn btn-outline-primary btn-sm w-100 mt-3 fw-semibold">
+                Manage Courses <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Module 4: Enrollment Center -->
+    <div class="col-12 col-md-6 col-xl-4">
+        <div class="home-module-card">
+            <div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="home-module-icon bg-warning-subtle text-warning">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Registrations</span>
+                </div>
+                <h5 class="home-module-title">Enrollment Center</h5>
+                <p class="home-module-desc">
+                    Register students into active courses, update course progression percentages, review completion dates, and manage academic grades.
+                </p>
+            </div>
+            <a href="/enrollments" class="btn btn-outline-primary btn-sm w-100 mt-3 fw-semibold">
+                Manage Enrollments <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Module 5: Activity Tracker -->
+    <div class="col-12 col-md-6 col-xl-4">
+        <div class="home-module-card">
+            <div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="home-module-icon bg-danger-subtle text-danger">
+                        <i class="bi bi-activity"></i>
+                    </div>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Telemetry</span>
+                </div>
+                <h5 class="home-module-title">Learning Activity Tracker</h5>
+                <p class="home-module-desc">
+                    Monitor granular learning telemetry: video watch times, quiz attempts, assignments, and test scores with timestamps and duration logs.
+                </p>
+            </div>
+            <a href="/activities" class="btn btn-outline-primary btn-sm w-100 mt-3 fw-semibold">
+                View Activity Logs <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Module 6: Reports & Export -->
+    <div class="col-12 col-md-6 col-xl-4">
+        <div class="home-module-card">
+            <div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="home-module-icon" style="background: rgba(124, 58, 237, 0.12); color: #7c3aed;">
+                        <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                    </div>
+                    <span class="badge border" style="background: rgba(124, 58, 237, 0.1); color: #7c3aed; border-color: rgba(124, 58, 237, 0.2) !important;">Audit &amp; Viva</span>
+                </div>
+                <h5 class="home-module-title">Reports &amp; Data Export</h5>
+                <p class="home-module-desc">
+                    Generate platform audit reports, download clean CSV datasets (Course Completion, Inactive Students, Weekly Trends), and render server charts.
+                </p>
+            </div>
+            <a href="/reports" class="btn btn-outline-primary btn-sm w-100 mt-3 fw-semibold">
+                Export Data Reports <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 4. Recent Highlights & Platform Status -->
+<div class="row g-4 mb-4">
+    <!-- Recent Activity Feed -->
+    <div class="col-12 col-lg-7">
+        <div class="analytics-card h-100">
+            <div class="analytics-card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-clock-history text-primary"></i>
+                    <h5 class="analytics-card-title mb-0">Recent Learning Activities</h5>
+                </div>
+                <a href="/activities" class="btn btn-sm btn-outline-secondary">View All</a>
+            </div>
+            <div class="analytics-card-body p-0">
+                {% if recent_activities %}
+                <div class="table-responsive">
+                    <table class="table custom-table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Learner</th>
+                                <th>Course</th>
+                                <th>Type</th>
+                                <th class="text-center">Score</th>
+                                <th class="text-end">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for act in recent_activities %}
+                            <tr>
+                                <td class="fw-semibold text-navy">{{ act.learner_name }}</td>
+                                <td class="small text-muted">{{ act.course_name }}</td>
+                                <td>
+                                    <span class="badge {% if act.activity_type == 'Quiz' %}bg-primary-subtle text-primary border border-primary-subtle{% elif act.activity_type == 'Video' %}bg-info-subtle text-info border border-info-subtle{% else %}bg-warning-subtle text-warning border border-warning-subtle{% endif %}">
+                                        {{ act.activity_type }}
+                                    </span>
+                                </td>
+                                <td class="text-center fw-bold {% if act.score and act.score >= 75 %}text-success{% elif act.score and act.score >= 50 %}text-primary{% else %}text-secondary{% endif %}">
+                                    {{ act.score if act.score is not none else '-' }}{% if act.score is not none %}%{% endif %}
+                                </td>
+                                <td class="text-end text-muted small">
+                                    {{ act.activity_date.strftime('%Y-%m-%d') if act.activity_date else 'Recently' }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-info-circle me-1"></i> No activity logs recorded yet.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Courses Overview -->
+    <div class="col-12 col-lg-5">
+        <div class="analytics-card h-100">
+            <div class="analytics-card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-trophy text-warning"></i>
+                    <h5 class="analytics-card-title mb-0">Popular Courses</h5>
+                </div>
+                <a href="/courses" class="btn btn-sm btn-outline-secondary">Catalog</a>
+            </div>
+            <div class="analytics-card-body">
+                {% if top_courses %}
+                <div class="d-flex flex-column gap-3">
+                    {% for course in top_courses %}
+                    {% set rate = (course.completed_count / course.total_enrolled * 100)|round(1) if course.total_enrolled > 0 else 0 %}
+                    <div class="p-3 rounded border" style="background: var(--table-hover-bg); border-color: var(--border-color) !important;">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold text-navy small text-truncate" style="max-width: 65%;">{{ course.course_name }}</span>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.72rem;">{{ course.category }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center small text-muted mb-2">
+                            <span><i class="bi bi-people me-1"></i> {{ course.total_enrolled }} Enrolled</span>
+                            <span>{{ course.completed_count }} Completed ({{ rate }}%)</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ rate }}%;" aria-valuenow="{{ rate }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-info-circle me-1"></i> No course enrollment data available.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 5. System Health & Environment Summary -->
+<div class="analytics-card">
+    <div class="analytics-card-body py-3">
+        <div class="row align-items-center g-3">
+            <div class="col-12 col-md-4">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success-subtle text-success p-2 rounded-circle">
+                        <i class="bi bi-database-check fs-5"></i>
+                    </span>
+                    <div>
+                        <div class="fw-bold text-navy small">MySQL 8.0 &bull; elearning_db</div>
+                        <small class="text-muted">Host: 127.0.0.1:3306 (Connected)</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4 text-md-center">
+                <div class="d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-palette text-primary"></i>
+                    <span class="small text-muted">Locked Theme:</span>
+                    <strong class="small text-navy text-capitalize">{{ active_theme }} Mode</strong>
+                </div>
+            </div>
+            <div class="col-12 col-md-4 text-md-end">
+                <a href="/settings" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-gear me-1"></i> System Diagnostics &amp; Settings
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

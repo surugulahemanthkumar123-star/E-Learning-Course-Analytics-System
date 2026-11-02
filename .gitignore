@@ -1,0 +1,32 @@
+# Python virtual environment and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment variables & secrets (NEVER commit credentials)
+.env
+.env.local
+
+# Visual Studio Code & IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Generated charts and exports (keep the folder tracking files)
+static/charts/*.png
+exports/*.csv
+!static/charts/.gitkeep
+!exports/.gitkeep
+
+# OS specific files
+Thumbs.db
+Desktop.ini
+.DS_Store

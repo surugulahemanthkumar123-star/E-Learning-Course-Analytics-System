@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+
+{% block page_subtitle %}
+<p class="page-subtitle">Inspect local MySQL connectivity, database schemas, table integrity, and server configuration.</p>
+{% endblock %}
+
+{% block header_actions %}
+<button class="btn btn-outline-primary btn-sm" id="btnTestDbConnection">
+    <i class="bi bi-arrow-repeat me-1"></i> Test MySQL Connection
+</button>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Theme & Appearance Customizer -->
+    <div class="col-12">
+        <div class="analytics-card mb-2">
+            <div class="analytics-card-header">
+                <h5 class="analytics-card-title">
+                    <i class="bi bi-palette text-primary"></i> Application Appearance &amp; Color Theme
+                </h5>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1" id="settingsCurrentThemeBadge">
+                    Active: Dark Mode
+                </span>
+            </div>
+            <div class="analytics-card-body">
+                <p class="text-muted small mb-3">
+                    Select your preferred interface theme. The chosen theme applies instantly across all platform pages and is saved in your browser storage.
+                </p>
+                
+                <div class="row g-3">
+                    <!-- Dark Mode Option Card -->
+                    <div class="col-12 col-md-6">
+                        <div class="theme-choice-card p-3 rounded-4" id="themeCardDark" onclick="chooseTheme('dark')">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="icon-wrapper" style="width: 38px; height: 38px; border-radius: 10px; background: rgba(99, 102, 241, 0.2); color: #818cf8; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                        <i class="bi bi-moon-stars-fill"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-0 text-navy">Midnight Obsidian (Dark)</h6>
+                                        <small class="text-muted">High-contrast neon slate &bull; Optimized for Project Defense</small>
+                                    </div>
+                                </div>
+                                <span class="badge rounded-pill bg-primary px-3 py-1" id="themeActivePillDark">
+                                    <i class="bi bi-check2"></i> Active
+                                </span>
+                            </div>
+                            <div class="rounded-3 p-3 border" style="background: #080c14; border-color: #1e293b !important;">
+                                <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.7rem;">#01</span>
+                                        <span class="roll-no-badge font-monospace" style="font-size: 0.75rem;">2024CS001</span>
+                                        <span class="fw-bold text-navy" style="font-size: 0.8rem;">Full-Stack Web Dev</span>
+                                    </div>
+                                    <span class="badge badge-soft-success" style="font-size: 0.7rem;">Active</span>
+                                </div>
+                                <div class="progress" style="height: 5px; background: #1e293b;">
+                                    <div class="progress-bar bg-info" style="width: 78%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Light Mode Option Card -->
+                    <div class="col-12 col-md-6">
+                        <div class="theme-choice-card p-3 rounded-4" id="themeCardLight" onclick="chooseTheme('light')">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="icon-wrapper" style="width: 38px; height: 38px; border-radius: 10px; background: rgba(37, 99, 235, 0.15); color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                        <i class="bi bi-sun-fill"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-0 text-navy">Clean Slate (Light)</h6>
+                                        <small class="text-muted">Clean high-contrast paper white &bull; Standard Academic View</small>
+                                    </div>
+                                </div>
+                                <span class="badge rounded-pill bg-secondary d-none px-3 py-1" id="themeActivePillLight">
+                                    <i class="bi bi-check2"></i> Active
+                                </span>
+                            </div>
+                            <div class="rounded-3 p-3 border" style="background: #f8fafc; border-color: #e2e8f0 !important;">
+                                <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.7rem;">#01</span>
+                                        <span class="roll-no-badge font-monospace" style="font-size: 0.75rem;">2024CS001</span>
+                                        <span class="fw-bold text-navy" style="font-size: 0.8rem;">Full-Stack Web Dev</span>
+                                    </div>
+                                    <span class="badge badge-soft-success" style="font-size: 0.7rem;">Active</span>
+                                </div>
+                                <div class="progress" style="height: 5px; background: #e2e8f0;">
+                                    <div class="progress-bar bg-primary" style="width: 78%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Card -->
+    <div class="col-12 col-lg-6">
+        <div class="analytics-card h-100">
+            <div class="analytics-card-header">
+                <h5 class="analytics-card-title">
+                    <i class="bi bi-hdd-network text-primary"></i> MySQL Connection Status
+                </h5>
+                <span id="settingsStatusPill" class="badge bg-secondary">Checking...</span>
+            </div>
+            <div class="analytics-card-body">
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm custom-table mb-0">
+                        <tbody>
+                            <tr>
+                                <th class="text-muted" style="width: 40%;">Database Host</th>
+                                <td id="valHost" class="fw-semibold">localhost</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Port</th>
+                                <td id="valPort" class="fw-semibold">3306</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Database Name</th>
+                                <td id="valDbName" class="fw-semibold">elearning_db</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Database User</th>
+                                <td id="valUser" class="fw-semibold">root</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">MySQL Server Version</th>
+                                <td id="valVersion" class="fw-semibold text-primary">Unknown</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Schema Verification</th>
+                                <td id="valSchemaReady">
+                                    <span class="badge bg-secondary">Verifying...</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert alert-light border small text-muted mb-0">
+                    <i class="bi bi-shield-lock-fill text-success me-1"></i>
+                    <strong>Security Notice:</strong> Database passwords are encrypted in environment variables and never logged or sent to the browser client.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tables & Schema Verification -->
+    <div class="col-12 col-lg-6">
+        <div class="analytics-card h-100">
+            <div class="analytics-card-header">
+                <h5 class="analytics-card-title">
+                    <i class="bi bi-table text-primary"></i> Required Database Tables
+                </h5>
+                <span class="badge bg-light text-muted border">MySQL 8.0 InnoDB</span>
+            </div>
+            <div class="analytics-card-body">
+                <ul class="list-group list-group-flush mb-3" id="tableCheckList">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>users</strong>
+                            <div class="small text-muted">Authentication records, encrypted passwords &amp; user roles</div>
+                        </div>
+                        <span id="badge-users" class="badge bg-secondary"><i class="bi bi-hourglass-split"></i></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>courses</strong>
+                            <div class="small text-muted">Primary course records and subject classifications</div>
+                        </div>
+                        <span id="badge-courses" class="badge bg-secondary"><i class="bi bi-hourglass-split"></i></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>learners</strong>
+                            <div class="small text-muted">Student profiles with unique college roll numbers</div>
+                        </div>
+                        <span id="badge-learners" class="badge bg-secondary"><i class="bi bi-hourglass-split"></i></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>enrollments</strong>
+                            <div class="small text-muted">Learner course registrations and progress tracking</div>
+                        </div>
+                        <span id="badge-enrollments" class="badge bg-secondary"><i class="bi bi-hourglass-split"></i></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>activities</strong>
+                            <div class="small text-muted">Timestamped lesson and quiz participation records</div>
+                        </div>
+                        <span id="badge-activities" class="badge bg-secondary"><i class="bi bi-hourglass-split"></i></span>
+                    </li>
+                </ul>
+
+                <div id="settingsMessageAlert" class="alert alert-info small mb-0">
+                    Checking database status...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workbench & Setup Guide -->
+    <div class="col-12">
+        <div class="analytics-card">
+            <div class="analytics-card-header">
+                <h5 class="analytics-card-title">
+                    <i class="bi bi-tools text-primary"></i> Database Troubleshooting &amp; Workbench Instructions
+                </h5>
+            </div>
+            <div class="analytics-card-body">
+                <div class="row g-4">
+                    <div class="col-12 col-md-6">
+                        <h6 class="fw-bold"><i class="bi bi-1-circle text-primary me-1"></i> Running database.sql in MySQL Workbench</h6>
+                        <ol class="small text-muted ps-3 mb-0">
+                            <li>Open <strong>MySQL Workbench</strong> and connect to your local MySQL connection.</li>
+                            <li>Press <kbd>Ctrl + Shift + O</kbd> (or <em>File &rarr; Open SQL Script...</em>).</li>
+                            <li>Choose <code>database.sql</code> from the project folder.</li>
+                            <li>Click the <strong>Lightning Bolt icon</strong> (Execute) to execute the whole script.</li>
+                            <li>Refresh the schemas list on the left side to see <code>elearning_db</code>.</li>
+                        </ol>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <h6 class="fw-bold"><i class="bi bi-2-circle text-primary me-1"></i> Setting your .env Credentials</h6>
+                        <ol class="small text-muted ps-3 mb-0">
+                            <li>Copy <code>.env.example</code> to <code>.env</code> in the project root directory.</li>
+                            <li>Set <code>DB_PASSWORD=your_actual_mysql_password</code> (your local root password).</li>
+                            <li>Ensure <code>DB_USER=root</code> and <code>DB_NAME=elearning_db</code>.</li>
+                            <li>Save the <code>.env</code> file and restart the Flask server.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    checkHealth();
+
+    // Initialize Theme UI in Settings (locks with active theme)
+    const currentTheme = window.getStoredTheme ? window.getStoredTheme() : (localStorage.getItem('eduTheme') || 'light');
+    syncThemeUI(currentTheme);
+
+    window.addEventListener('themeChanged', (e) => {
+        syncThemeUI(e.detail.theme);
+    });
+
+    document.getElementById('btnTestDbConnection')?.addEventListener('click', () => {
+        const btn = document.getElementById('btnTestDbConnection');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Testing...';
+        checkHealth().finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-arrow-repeat me-1"></i> Test MySQL Connection';
+        });
+    });
+});
+
+function chooseTheme(theme) {
+    if (window.applyTheme) {
+        window.applyTheme(theme);
+    } else {
+        document.documentElement.setAttribute('data-theme', theme);
+        try { localStorage.setItem('eduTheme', theme); } catch(e) {}
+        try { document.cookie = 'eduTheme=' + theme + '; path=/; max-age=31536000; SameSite=Lax'; } catch(e) {}
+    }
+    syncThemeUI(theme);
+}
+
+function syncThemeUI(theme) {
+    const isDark = theme === 'dark';
+    const cardDark = document.getElementById('themeCardDark');
+    const cardLight = document.getElementById('themeCardLight');
+    const pillDark = document.getElementById('themeActivePillDark');
+    const pillLight = document.getElementById('themeActivePillLight');
+    const badge = document.getElementById('settingsCurrentThemeBadge');
+
+    if (cardDark && cardLight) {
+        if (isDark) {
+            cardDark.classList.add('selected');
+            cardLight.classList.remove('selected');
+            if (pillDark) { pillDark.className = 'badge rounded-pill bg-primary px-3 py-1'; pillDark.classList.remove('d-none'); }
+            if (pillLight) { pillLight.classList.add('d-none'); }
+            if (badge) { badge.textContent = 'Active: Midnight Obsidian (Dark)'; }
+        } else {
+            cardLight.classList.add('selected');
+            cardDark.classList.remove('selected');
+            if (pillLight) { pillLight.className = 'badge rounded-pill bg-primary px-3 py-1'; pillLight.classList.remove('d-none'); }
+            if (pillDark) { pillDark.classList.add('d-none'); }
+            if (badge) { badge.textContent = 'Active: Clean Slate (Light)'; }
+        }
+    }
+}
+
+async function checkHealth() {
+    const statusPill = document.getElementById('settingsStatusPill');
+    const msgAlert = document.getElementById('settingsMessageAlert');
+
+    try {
+        const res = await fetch('/api/health');
+        const json = await res.json();
+        const db = json.database || {};
+
+        document.getElementById('valHost').textContent = db.host || 'localhost';
+        document.getElementById('valPort').textContent = db.port || 3306;
+        document.getElementById('valDbName').textContent = db.database || 'elearning_db';
+        document.getElementById('valUser').textContent = db.user || 'root';
+        document.getElementById('valVersion').textContent = db.mysql_version || 'Unknown';
+
+        if (db.connected) {
+            statusPill.className = 'badge bg-success';
+            statusPill.textContent = 'Connected (Online)';
+            msgAlert.className = 'alert alert-success small mb-0';
+            msgAlert.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> ${json.message}`;
+
+            const tables = db.tables_found || [];
+            ['users', 'courses', 'learners', 'enrollments', 'activities'].forEach(t => {
+                const badge = document.getElementById(`badge-${t}`);
+                if (badge) {
+                    if (tables.includes(t)) {
+                        badge.className = 'badge bg-success';
+                        badge.innerHTML = '<i class="bi bi-check-lg me-1"></i> Verified';
+                    } else {
+                        badge.className = 'badge bg-danger';
+                        badge.innerHTML = '<i class="bi bi-x-lg me-1"></i> Missing';
+                    }
+                }
+            });
+
+            const schemaReadyEl = document.getElementById('valSchemaReady');
+            if (db.schema_ready) {
+                schemaReadyEl.innerHTML = '<span class="badge bg-success-subtle text-success border border-success-subtle">All 5 Tables Verified</span>';
+            } else {
+                schemaReadyEl.innerHTML = '<span class="badge bg-warning-subtle text-warning border border-warning-subtle">Incomplete (Run database.sql)</span>';
+            }
+        } else {
+            statusPill.className = 'badge bg-danger';
+            statusPill.textContent = 'Disconnected (Offline)';
+            msgAlert.className = 'alert alert-danger small mb-0';
+            msgAlert.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> ${json.message}`;
+
+            ['users', 'courses', 'learners', 'enrollments', 'activities'].forEach(t => {
+                const badge = document.getElementById(`badge-${t}`);
+                if (badge) {
+                    badge.className = 'badge bg-secondary';
+                    badge.textContent = 'Unavailable';
+                }
+            });
+
+            document.getElementById('valSchemaReady').innerHTML = '<span class="badge bg-danger-subtle text-danger border">Offline</span>';
+        }
+
+    } catch (err) {
+        statusPill.className = 'badge bg-danger';
+        statusPill.textContent = 'Server Unreachable';
+        msgAlert.className = 'alert alert-danger small mb-0';
+        msgAlert.textContent = 'Cannot communicate with the Flask web server.';
+    }
+}
+</script>
+{% endblock %}

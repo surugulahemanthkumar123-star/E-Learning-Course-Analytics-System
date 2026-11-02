@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block page_subtitle %}
+<p class="page-subtitle">Platform-wide course completion analytics, weekly activity trends, and inactive student monitoring.</p>
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex align-items-center gap-2">
+    <button class="btn btn-outline-secondary btn-sm" id="btnRefreshDashboard" title="Refresh Dashboard">
+        <i class="bi bi-arrow-clockwise me-1"></i> Refresh Data
+    </button>
+    <a href="/reports" class="btn btn-primary btn-sm">
+        <i class="bi bi-file-earmark-arrow-down me-1"></i> Export Reports
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Notice Banner if DB offline or empty -->
+<div id="dbAlertContainer"></div>
+
+<!-- 1. Top Summary Metric Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-xl-2">
+        <div class="metric-card blue">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="metric-label">Total Courses</div>
+                    <div class="metric-value" id="cardTotalCourses">0</div>
+                </div>
+                <div class="icon-wrapper">
+                    <i class="bi bi-journal-text"></i>
+                </div>
+            </div>
+            <div class="metric-trend text-primary">
+                <i class="bi bi-check2-all"></i> Active Catalog
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-2">
+        <div class="metric-card purple">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="metric-label">Total Learners</div>
+                    <div class="metric-value" id="cardTotalLearners">0</div>
+                </div>
+                <div class="icon-wrapper">
+                    <i class="bi bi-people"></i>
+                </div>
+            </div>
+            <div class="metric-trend" style="color: #7c3aed;">
+                <i class="bi bi-person-badge"></i> Enrolled Pool
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-2">
+        <div class="metric-card emerald">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="metric-label">Total Enrollments</div>
+                    <div class="metric-value" id="cardTotalEnrollments">0</div>
+                </div>
+                <div class="icon-wrapper">
+                    <i class="bi bi-mortarboard"></i>
+                </div>
+            </div>
+            <div class="metric-trend text-success">
+                <i class="bi bi-arrow-repeat"></i> Active Seats
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-2">
+        <div class="metric-card green">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="metric-label">Completed</div>
+                    <div class="metric-value" id="cardCompletedEnrollments">0</div>
+                </div>
+                <div class="icon-wrapper">
+                    <i class="bi bi-award"></i>
+                </div>
+            </div>
+            <div class="metric-trend text-success" id="cardCompletedSub">
+                <i class="bi bi-trophy"></i> 0 In Progress
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-2">
+        <div class="metric-card amber">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="metric-label">Overall Completion</div>
+                    <div class="metric-value" id="cardOverallRate">0%</div>
+                </div>
+                <div class="icon-wrapper">
+                    <i class="bi bi-pie-chart"></i>
+                </div>
+            </div>
+            <div class="metric-trend text-warning">
+                <i class="bi bi-speedometer2"></i> Weighted Metric
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-2">
+        <div class="metric-card red">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="metric-label">Inactive (&gt;14d)</div>
+                    <div class="metric-value text-danger" id="cardInactiveCount">0</div>
+                </div>
+                <div class="icon-wrapper">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+            </div>
+            <div class="metric-trend text-danger">
+                <a href="#inactiveSection" class="text-danger text-decoration-none fw-bold">
+                    <i class="bi bi-exclamation-triangle"></i> Review Alert &darr;
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Charts Section: Course Completion & Weekly Activity -->
+<div class="row g-3 mb-4">
+    <!-- Course Completion Chart -->
+    <div class="col-12 col-xl-7">
+        <div class="analytics-card h-100">
+            <div class="analytics-card-header">
+                <h5 class="analytics-card-title">
+                    <i class="bi bi-bar-chart-fill text-primary"></i> Course Completion Rates
+                </h5>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-outline-secondary py-1 px-2" id="btnDownloadCourseChart" title="Download Chart Image">
+                        <i class="bi bi-camera me-1"></i> Save PNG
+                    </button>
+                    <span class="badge bg-light text-muted border">Live Chart.js</span>
+                </div>
+            </div>
+            <div class="analytics-card-body">
+                <div style="position: relative; height: 320px;">
+                    <canvas id="courseCompletionChart"></canvas>
+                </div>
+                <div id="courseCompletionEmpty" class="empty-state d-none">
+                    <i class="bi bi-bar-chart"></i>
+                    <h5>No Course Data Available</h5>
+                    <p class="small text-muted">Add courses and enrollments to visualize completion analytics.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weekly Learning Activity Trend -->
+    <div class="col-12 col-xl-5">
+        <div class="analytics-card h-100">
+            <div class="analytics-card-header">
+                <h5 class="analytics-card-title">
+                    <i class="bi bi-graph-up-arrow text-success"></i> Weekly Activity Trend
+                </h5>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-outline-secondary py-1 px-2" id="btnDownloadWeeklyChart" title="Download Chart Image">
+                        <i class="bi bi-camera me-1"></i> Save PNG
+                    </button>
+                    <span class="badge bg-light text-muted border">Weekly Resample</span>
+                </div>
+            </div>
+            <div class="analytics-card-body">
+                <div style="position: relative; height: 320px;">
+                    <canvas id="weeklyActivityChart"></canvas>
+                </div>
+                <div id="weeklyActivityEmpty" class="empty-state d-none">
+                    <i class="bi bi-calendar-x"></i>
+                    <h5>No Activity Records Found</h5>
+                    <p class="small text-muted">Learner activities will appear here grouped by week.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Course Performance Comparison Table -->
+<div class="analytics-card mb-4">
+    <div class="analytics-card-header">
+        <h5 class="analytics-card-title">
+            <i class="bi bi-table text-primary"></i> Course Performance Benchmark &amp; Thresholds
+        </h5>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge badge-soft-success">Excellent &ge; 75%</span>
+            <span class="badge badge-soft-primary">Good &ge; 50%</span>
+            <span class="badge badge-soft-warning">Average &ge; 25%</span>
+            <span class="badge badge-soft-danger">Needs Attention &lt; 25%</span>
+        </div>
+    </div>
+    <div class="analytics-card-body p-0">
+        <div class="table-responsive">
+            <table class="table custom-table table-hover align-middle mb-0" id="tableCourseComparison">
+                <thead>
+                    <tr>
+                        <th>Course Name</th>
+                        <th>Category</th>
+                        <th class="text-center">Total Enrolled</th>
+                        <th class="text-center">Completed</th>
+                        <th class="text-center">In Progress</th>
+                        <th>Completion Rate</th>
+                        <th class="text-center">Performance Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyCourseComparison">
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <span class="spinner-border spinner-border-sm me-2"></span> Loading performance data...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 4. Inactive Enrollments Detection Table -->
+<div class="analytics-card mb-4" id="inactiveSection">
+    <div class="analytics-card-header">
+        <div class="d-flex align-items-center gap-2">
+            <h5 class="analytics-card-title text-danger">
+                <i class="bi bi-exclamation-triangle-fill"></i> Inactive Enrollments Detection
+            </h5>
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Default: &gt; 14 Days Inactive</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <label class="form-label mb-0 small text-muted">Threshold (Days):</label>
+            <input type="number" id="inputInactiveThreshold" class="form-control form-control-sm" style="width: 80px;" value="14" min="1" max="365">
+            <button class="btn btn-sm btn-outline-danger" id="btnFilterInactive">Filter</button>
+        </div>
+    </div>
+    <div class="analytics-card-body p-0">
+        <div class="table-responsive">
+            <table class="table custom-table table-hover align-middle mb-0" id="tableInactiveEnrollments">
+                <thead>
+                    <tr>
+                        <th>Roll Number</th>
+                        <th>Course Name</th>
+                        <th>Enrolled Date</th>
+                        <th>Last Activity Date</th>
+                        <th class="text-center">Days Inactive</th>
+                        <th class="text-center">Status</th>
+                        <th>Inactivity Reason</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyInactiveEnrollments">
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            <span class="spinner-border spinner-border-sm me-2"></span> Scanning for inactive enrollments...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}?v=5.0"></script>
+{% endblock %}
