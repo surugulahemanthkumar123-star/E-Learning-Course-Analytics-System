@@ -26,6 +26,9 @@
     
     <!-- Custom Modern UI CSS (v6.0 Bulletproof Cookie & LocalStorage Theme Lock) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=6.0">
+
+    <!-- CSRF Protection Token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
@@ -91,12 +94,18 @@
                         <span>Settings</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="/profile" class="nav-link {% if request.path == '/profile' %}active{% endif %}">
+                        <i class="bi bi-person-circle"></i>
+                        <span>My Profile</span>
+                    </a>
+                </li>
             </ul>
 
             <div class="sidebar-footer">
                 {% if current_user and current_user.is_authenticated %}
                 <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom border-secondary border-opacity-25">
-                    <div class="d-flex align-items-center gap-2 text-truncate">
+                    <a href="/profile" class="d-flex align-items-center gap-2 text-truncate text-decoration-none" title="View & Edit My Profile">
                         <div class="avatar-initials" style="width: 28px; height: 28px; font-size: 0.7rem;">
                             {{ current_user.full_name[:2].upper() if current_user.full_name else 'AD' }}
                         </div>
@@ -104,7 +113,7 @@
                             <div class="text-light small fw-bold text-truncate">{{ current_user.full_name or current_user.username }}</div>
                             <small class="text-secondary" style="font-size: 0.72rem;">{{ current_user.role or 'Admin' }}</small>
                         </div>
-                    </div>
+                    </a>
                     <a href="/logout" class="btn btn-sm btn-outline-danger py-0 px-2" title="Sign Out">
                         <i class="bi bi-box-arrow-right"></i>
                     </a>
@@ -244,6 +253,32 @@
 
     <!-- Global Helper JS -->
     <script>
+        // Automatic CSRF Token Injection for all State-Changing AJAX Requests
+        (function() {
+            const originalFetch = window.fetch;
+            window.fetch = function(url, options) {
+                options = options || {};
+                const method = (options.method || 'GET').toUpperCase();
+                if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+                    const meta = document.querySelector('meta[name="csrf-token"]');
+                    const token = meta ? meta.getAttribute('content') : '';
+                    if (token) {
+                        options.headers = options.headers || {};
+                        if (options.headers instanceof Headers) {
+                            if (!options.headers.has('X-CSRFToken')) options.headers.set('X-CSRFToken', token);
+                        } else if (Array.isArray(options.headers)) {
+                            if (!options.headers.some(h => h[0].toLowerCase() === 'x-csrftoken')) options.headers.push(['X-CSRFToken', token]);
+                        } else {
+                            if (!options.headers['X-CSRFToken'] && !options.headers['x-csrftoken']) {
+                                options.headers['X-CSRFToken'] = token;
+                            }
+                        }
+                    }
+                }
+                return originalFetch(url, options);
+            };
+        })();
+
         // Responsive Mobile Sidebar Toggle
         const sidebar = document.getElementById('appSidebar');
         const backdrop = document.getElementById('sidebarBackdrop');
@@ -262,6 +297,18 @@
                 backdrop.classList.remove('show');
             });
         }
+
+        // Global HTML Sanitizer for XSS Prevention
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+        window.escapeHtml = escapeHtml;
 
         // Global Toast Notification Helper
         function showToast(message, type = 'info') {
@@ -306,6 +353,17 @@
             fetch('/api/settings/theme', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ theme: theme })
+            }).catch(() => {});
+
+            // Also persist to isolated user profile preferences if logged in
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            fetch('/api/user/preferences', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfMeta
+                },
                 body: JSON.stringify({ theme: theme })
             }).catch(() => {});
             

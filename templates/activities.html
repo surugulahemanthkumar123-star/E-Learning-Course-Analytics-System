@@ -22,7 +22,13 @@
 
         <!-- Filters -->
         <div class="d-flex flex-wrap align-items-center gap-2">
-            <select id="filterActivityType" class="form-select form-select-sm" style="width: 150px;">
+            <select id="filterActivityCourse" class="form-select form-select-sm" style="width: 170px;">
+                <option value="">All Courses</option>
+            </select>
+            <select id="filterActivityLearner" class="form-select form-select-sm" style="width: 160px;">
+                <option value="">All Learners</option>
+            </select>
+            <select id="filterActivityType" class="form-select form-select-sm" style="width: 140px;">
                 <option value="">All Activity Types</option>
                 <option value="Lesson">Lesson</option>
                 <option value="Quiz">Quiz</option>
@@ -30,8 +36,8 @@
                 <option value="Practice">Practice</option>
                 <option value="Project">Project</option>
             </select>
-            <input type="date" id="filterStartDate" class="form-control form-control-sm" style="width: 135px;" title="Start Date">
-            <input type="date" id="filterEndDate" class="form-control form-control-sm" style="width: 135px;" title="End Date">
+            <input type="date" id="filterStartDate" class="form-control form-control-sm" style="width: 130px;" title="Start Date">
+            <input type="date" id="filterEndDate" class="form-control form-control-sm" style="width: 130px;" title="End Date">
             <button class="btn btn-outline-secondary btn-sm" id="btnApplyActivityFilter">
                 <i class="bi bi-funnel"></i> Filter
             </button>
@@ -45,10 +51,12 @@
             <table class="table custom-table table-hover align-middle mb-0" id="tableActivities">
                 <thead>
                     <tr>
-                        <th style="width: 70px;">ID</th>
+                        <th style="width: 60px;">ID</th>
                         <th>Learner Roll No</th>
                         <th>Course</th>
                         <th>Activity Type</th>
+                        <th>Score</th>
+                        <th>Duration</th>
                         <th>Timestamp</th>
                         <th class="text-center">Completion</th>
                         <th class="text-end">Actions</th>
@@ -56,7 +64,7 @@
                 </thead>
                 <tbody id="tbodyActivities">
                     <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">
+                        <td colspan="9" class="text-center py-4 text-muted">
                             <span class="spinner-border spinner-border-sm me-2"></span> Loading learning activities...
                         </td>
                     </tr>
@@ -93,6 +101,17 @@
                             <option value="Practice">Practice</option>
                             <option value="Project">Project</option>
                         </select>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label for="inputActivityScore" class="form-label fw-semibold">Score (0–100) <span class="text-muted small fw-normal">(Optional)</span></label>
+                            <input type="number" step="0.1" min="0" max="100" class="form-control" id="inputActivityScore" placeholder="e.g. 85.0">
+                        </div>
+                        <div class="col-6">
+                            <label for="inputActivityTimeSpent" class="form-label fw-semibold">Time Spent (min) <span class="text-muted small fw-normal">(Optional)</span></label>
+                            <input type="number" min="0" max="1440" class="form-control" id="inputActivityTimeSpent" placeholder="e.g. 45">
+                        </div>
                     </div>
 
                     <div class="mb-3">

@@ -20,11 +20,14 @@ venv.bak/
 *.swp
 *.swo
 
-# Generated charts and exports (keep the folder tracking files)
+# Generated charts, exports & runtime backups
 static/charts/*.png
-exports/*.csv
+exports/*
 !static/charts/.gitkeep
 !exports/.gitkeep
+backups/*.sql
+user_preferences.json
+user_preferences.json.tmp
 
 # OS specific files
 Thumbs.db

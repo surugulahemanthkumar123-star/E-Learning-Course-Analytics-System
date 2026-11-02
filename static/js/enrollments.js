@@ -135,21 +135,21 @@ async function loadEnrollments() {
                 <tr>
                     <td><span class="badge bg-primary-subtle text-primary border border-primary-subtle fw-bold">#${e.enrollment_id}</span></td>
                     <td>
-                        <span class="roll-no-badge font-monospace">${e.roll_no}</span>
+                        <span class="roll-no-badge font-monospace">${escapeHtml(e.roll_no)}</span>
                     </td>
                     <td>
-                        <div class="fw-bold text-navy">${e.course_name}</div>
-                        <small class="text-muted">${e.category}</small>
+                        <div class="fw-bold text-navy">${escapeHtml(e.course_name)}</div>
+                        <small class="text-muted">${escapeHtml(e.category)}</small>
                     </td>
-                    <td>${e.enrolled_at || 'N/A'}</td>
+                    <td>${escapeHtml(e.enrolled_at || 'N/A')}</td>
                     <td class="text-center">
-                        <span class="badge ${badgeClass} px-2 py-1">${e.status}</span>
+                        <span class="badge ${badgeClass} px-2 py-1">${escapeHtml(e.status)}</span>
                     </td>
                     <td class="text-center">
                         <span class="badge bg-primary-subtle text-primary fw-bold px-2 py-1">${e.activity_count}</span>
                     </td>
                     <td>
-                        <small class="text-muted">${e.last_activity_date || 'No activity'}</small>
+                        <small class="text-muted">${escapeHtml(e.last_activity_date || 'No activity')}</small>
                     </td>
                     <td class="text-end">
                         <div class="btn-group btn-group-sm">
@@ -205,7 +205,7 @@ async function handleSaveEnrollment(e) {
             enrollmentModal.hide();
             loadEnrollments();
         } else {
-            showToast(json.message || 'Failed to enroll learner.', 'danger');
+            showToast(json.message || json.error || 'Failed to enroll learner.', 'danger');
         }
     } catch (err) {
         showToast('Network error while enrolling learner.', 'danger');
@@ -245,7 +245,7 @@ async function handleSaveStatus(e) {
             updateStatusModal.hide();
             loadEnrollments();
         } else {
-            showToast(json.message || 'Failed to update status.', 'danger');
+            showToast(json.message || json.error || 'Failed to update status.', 'danger');
         }
     } catch (err) {
         showToast('Network error while updating status.', 'danger');

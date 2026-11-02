@@ -53,6 +53,8 @@ CREATE TABLE courses (
     course_id INT AUTO_INCREMENT PRIMARY KEY,
     course_name VARCHAR(100) NOT NULL,
     category VARCHAR(50) NOT NULL,
+    description TEXT NULL DEFAULT NULL,
+    credits INT NULL DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_course_category (category)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -64,6 +66,9 @@ CREATE TABLE courses (
 CREATE TABLE learners (
     learner_id INT AUTO_INCREMENT PRIMARY KEY,
     roll_no VARCHAR(30) NOT NULL,
+    name VARCHAR(100) NULL DEFAULT NULL,
+    email VARCHAR(100) NULL DEFAULT NULL,
+    department VARCHAR(50) NULL DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uq_learner_roll UNIQUE (roll_no)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -102,6 +107,8 @@ CREATE TABLE activities (
     activity_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     activity_type VARCHAR(50) NOT NULL,
     completed BOOLEAN NOT NULL DEFAULT FALSE,
+    score DECIMAL(5,2) NULL DEFAULT NULL,
+    time_spent_minutes INT NULL DEFAULT NULL,
     CONSTRAINT fk_activity_enrollment FOREIGN KEY (enrollment_id)
         REFERENCES enrollments(enrollment_id)
         ON DELETE CASCADE

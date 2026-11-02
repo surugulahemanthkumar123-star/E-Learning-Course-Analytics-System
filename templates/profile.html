@@ -1,0 +1,458 @@
+{% extends "base.html" %}
+
+{% block page_subtitle %}
+<p class="page-subtitle">Manage your personal account credentials, update contact information, and securely modify your password.</p>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Left Column: User Summary Card -->
+    <div class="col-12 col-lg-4">
+        <div class="analytics-card mb-4 text-center p-4">
+            <div class="avatar-initials mx-auto mb-3" style="width: 76px; height: 76px; font-size: 1.8rem; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #4f46e5); color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
+                {{ user.full_name[:2].upper() if user.full_name else 'US' }}
+            </div>
+            <h4 class="fw-bold mb-1 text-navy" id="profileCardName">{{ user.full_name or user.username }}</h4>
+            <p class="text-muted small mb-2 font-monospace">@{{ user.username }}</p>
+
+            <div class="mb-3">
+                {% if user.role == 'Admin' %}
+                    <span class="badge bg-primary px-3 py-2 rounded-pill fs-7">
+                        <i class="bi bi-shield-lock-fill me-1"></i> System Administrator
+                    </span>
+                {% elif user.role == 'Academic Analyst' %}
+                    <span class="badge bg-info px-3 py-2 rounded-pill text-dark fs-7">
+                        <i class="bi bi-graph-up-arrow me-1"></i> Academic Analyst
+                    </span>
+                {% elif user.role == 'Instructor' %}
+                    <span class="badge bg-warning px-3 py-2 rounded-pill text-dark fs-7">
+                        <i class="bi bi-person-video3 me-1"></i> Course Instructor
+                    </span>
+                {% else %}
+                    <span class="badge bg-secondary px-3 py-2 rounded-pill fs-7">{{ user.role }}</span>
+                {% endif %}
+            </div>
+
+            <div class="border-top pt-3 text-start small text-muted">
+                <div class="d-flex justify-content-between py-1">
+                    <span><i class="bi bi-envelope me-1"></i> Email:</span>
+                    <strong class="text-navy text-truncate" id="profileCardEmail">{{ user.email }}</strong>
+                </div>
+                <div class="d-flex justify-content-between py-1">
+                    <span><i class="bi bi-calendar-event me-1"></i> Member Since:</span>
+                    <span class="text-navy">{{ user.created_at[:10] if user.created_at else 'Active' }}</span>
+                </div>
+                <div class="d-flex justify-content-between py-1">
+                    <span><i class="bi bi-shield-check me-1"></i> Account Status:</span>
+                    <span class="badge badge-soft-success">Verified &bull; Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Notice Card -->
+        <div class="analytics-card p-3">
+            <h6 class="fw-bold text-navy mb-2"><i class="bi bi-shield-shaded text-primary me-1"></i> Role-Based Permissions</h6>
+            <p class="small text-muted mb-2">
+                Your account is assigned the <strong>{{ user.role }}</strong> role.
+            </p>
+            <ul class="small text-muted ps-3 mb-0">
+                {% if user.role == 'Admin' %}
+                    <li>Full administrative control over courses &amp; learners.</li>
+                    <li>Enrollment &amp; learning activity management.</li>
+                    <li>System settings &amp; diagnostic inspection.</li>
+                {% elif user.role == 'Academic Analyst' %}
+                    <li>Course completion &amp; retention telemetry access.</li>
+                    <li>Inactive student early warning exports.</li>
+                    <li>Read-only inspection of academic records.</li>
+                {% elif user.role == 'Instructor' %}
+                    <li>Course telemetry and learner progress monitoring.</li>
+                    <li>Learning activity recording &amp; status updates.</li>
+                    <li>Course completion reporting.</li>
+                {% else %}
+                    <li>Standard platform user access.</li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Right Column: Profile & Security Management -->
+    <div class="col-12 col-lg-8">
+        <!-- Toast / Alert Feedback Box -->
+        <div id="profileAlertContainer" class="mb-3"></div>
+
+        <!-- Personal Information Card -->
+        <div class="analytics-card mb-4">
+            <div class="analytics-card-header">
+                <h5 class="analytics-card-title">
+                    <i class="bi bi-person-lines-fill text-primary"></i> Personal Profile Information
+                </h5>
+                <span class="badge bg-light text-muted border">Self-Service</span>
+            </div>
+            <div class="analytics-card-body">
+                <form id="formUpdateProfile">
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="profUsername" class="form-label small fw-semibold">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted border-end-0">
+                                    <i class="bi bi-at"></i>
+                                </span>
+                                <input type="text" class="form-control bg-light border-start-0" id="profUsername" value="{{ user.username }}" readonly disabled>
+                            </div>
+                            <small class="text-muted" style="font-size: 0.72rem;">Usernames are permanently linked to your audit trail.</small>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="profRole" class="form-label small fw-semibold">Assigned Role</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted border-end-0">
+                                    <i class="bi bi-shield-lock"></i>
+                                </span>
+                                <input type="text" class="form-control bg-light border-start-0" id="profRole" value="{{ user.role }}" readonly disabled>
+                            </div>
+                            <small class="text-muted" style="font-size: 0.72rem;">Roles cannot be self-elevated.</small>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="profFullName" class="form-label small fw-semibold">Full Name <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted">
+                                    <i class="bi bi-person"></i>
+                                </span>
+                                <input type="text" class="form-control border-start-0" id="profFullName" name="full_name" required value="{{ user.full_name }}" maxlength="100">
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="profEmail" class="form-label small fw-semibold">Institutional Email <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted">
+                                    <i class="bi bi-envelope"></i>
+                                </span>
+                                <input type="email" class="form-control border-start-0" id="profEmail" name="email" required value="{{ user.email }}" maxlength="100">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary btn-sm px-4" id="btnSaveProfile">
+                            <i class="bi bi-check2 me-1"></i> Save Profile Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- User Preferences & Workspace Settings (Phase 6) -->
+        <div class="analytics-card mb-4">
+            <div class="analytics-card-header">
+                <h5 class="analytics-card-title">
+                    <i class="bi bi-sliders2 text-primary"></i> User Preferences &amp; Workspace Defaults
+                </h5>
+                <span class="badge bg-light text-muted border">Isolated Profile Settings</span>
+            </div>
+            <div class="analytics-card-body">
+                <form id="formUserPreferences">
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-4">
+                            <label for="prefTheme" class="form-label small fw-semibold">Interface Theme</label>
+                            <select id="prefTheme" class="form-select">
+                                <option value="light">Light Theme</option>
+                                <option value="dark">Dark Theme</option>
+                            </select>
+                            <small class="text-muted" style="font-size: 0.72rem;">Persisted across your devices.</small>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label for="prefPageSize" class="form-label small fw-semibold">Table Page Size</label>
+                            <select id="prefPageSize" class="form-select">
+                                <option value="10">10 rows per page</option>
+                                <option value="25" selected>25 rows per page</option>
+                                <option value="50">50 rows per page</option>
+                                <option value="100">100 rows per page</option>
+                            </select>
+                            <small class="text-muted" style="font-size: 0.72rem;">Default pagination size for data tables.</small>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label for="prefDatePreset" class="form-label small fw-semibold">Default Analytics Preset</label>
+                            <select id="prefDatePreset" class="form-select">
+                                <option value="all_time" selected>All Time</option>
+                                <option value="today">Today</option>
+                                <option value="last_7">Last 7 Days</option>
+                                <option value="last_30">Last 30 Days</option>
+                                <option value="this_quarter">This Quarter</option>
+                            </select>
+                            <small class="text-muted" style="font-size: 0.72rem;">Initial date filter on dashboard load.</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-outline-primary btn-sm px-4" id="btnSavePreferences">
+                            <i class="bi bi-check2 me-1"></i> Save Preferences
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Secure Password Change Card -->
+        <div class="analytics-card">
+            <div class="analytics-card-header">
+                <h5 class="analytics-card-title">
+                    <i class="bi bi-key-fill text-primary"></i> Change Account Password
+                </h5>
+                <span class="badge bg-light text-muted border">Security</span>
+            </div>
+            <div class="analytics-card-body">
+                <form id="formChangePassword">
+                    <div class="mb-3">
+                        <label for="pwdCurrent" class="form-label small fw-semibold">Current Password <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0 text-muted">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input type="password" class="form-control border-start-0 border-end-0" id="pwdCurrent" name="current_password" required placeholder="Enter your current password" autocomplete="current-password">
+                            <button type="button" class="btn btn-outline-secondary border-start-0" onclick="togglePasswordVisibility('pwdCurrent', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label for="pwdNew" class="form-label small fw-semibold">New Password <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted">
+                                    <i class="bi bi-shield-plus"></i>
+                                </span>
+                                <input type="password" class="form-control border-start-0 border-end-0" id="pwdNew" name="new_password" required minlength="8" placeholder="Min. 8 alphanumeric chars" autocomplete="new-password">
+                                <button type="button" class="btn btn-outline-secondary border-start-0" onclick="togglePasswordVisibility('pwdNew', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="pwdConfirm" class="form-label small fw-semibold">Confirm New Password <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted">
+                                    <i class="bi bi-check2-circle"></i>
+                                </span>
+                                <input type="password" class="form-control border-start-0 border-end-0" id="pwdConfirm" name="confirm_password" required minlength="8" placeholder="Repeat new password" autocomplete="new-password">
+                                <button type="button" class="btn btn-outline-secondary border-start-0" onclick="togglePasswordVisibility('pwdConfirm', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-light border small text-muted mb-3 py-2">
+                        <i class="bi bi-info-circle-fill text-primary me-1"></i>
+                        <strong>Password Policy:</strong> Minimum 8 characters, must contain letters and numbers, and cannot match your current password.
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary btn-sm px-4" id="btnChangePassword">
+                            <i class="bi bi-shield-lock me-1"></i> Update Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showAlert(message, type) {
+    const container = document.getElementById('profileAlertContainer');
+    const icon = type === 'success' ? 'bi-check-circle-fill text-success' : 'bi-exclamation-triangle-fill text-danger';
+    container.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show d-flex align-items-center gap-2 py-2 small shadow-sm" role="alert">
+            <i class="bi ${icon} fs-5"></i>
+            <div>${escapeHtml(message)}</div>
+            <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'bi bi-eye';
+    }
+}
+
+// Handle Profile Information Update
+document.getElementById('formUpdateProfile').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSaveProfile');
+    const fullName = document.getElementById('profFullName').value.trim();
+    const email = document.getElementById('profEmail').value.trim();
+
+    if (!fullName || !email) {
+        showAlert('Full Name and Email are required.', 'danger');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+
+    try {
+        const res = await fetch('/api/profile', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ full_name: fullName, email: email })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            showAlert(data.message || 'Profile updated successfully.', 'success');
+            document.getElementById('profileCardName').textContent = fullName;
+            document.getElementById('profileCardEmail').textContent = email;
+        } else {
+            showAlert(data.message || 'Failed to update profile.', 'danger');
+        }
+    } catch (err) {
+        showAlert('Network error while updating profile.', 'danger');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check2 me-1"></i> Save Profile Changes';
+    }
+});
+
+// Handle Password Change
+document.getElementById('formChangePassword').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnChangePassword');
+    const currentPassword = document.getElementById('pwdCurrent').value;
+    const newPassword = document.getElementById('pwdNew').value;
+    const confirmPassword = document.getElementById('pwdConfirm').value;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        showAlert('All password fields are required.', 'danger');
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        showAlert('New password and confirmation do not match.', 'danger');
+        return;
+    }
+
+    if (newPassword.length < 8) {
+        showAlert('New password must be at least 8 characters long.', 'danger');
+        return;
+    }
+
+    if (!/[A-Za-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+        showAlert('New password must contain both letters and numbers.', 'danger');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Updating...';
+
+    try {
+        const res = await fetch('/api/profile/password', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                current_password: currentPassword,
+                new_password: newPassword,
+                confirm_password: confirmPassword
+            })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            showAlert(data.message || 'Password changed successfully.', 'success');
+            document.getElementById('formChangePassword').reset();
+        } else {
+            showAlert(data.message || 'Failed to change password.', 'danger');
+        }
+    } catch (err) {
+        showAlert('Network error while changing password.', 'danger');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-shield-lock me-1"></i> Update Password';
+    }
+});
+
+// Load and Save Preferences (Phase 6)
+async function loadPreferences() {
+    try {
+        const res = await fetch('/api/user/preferences');
+        if (!res.ok) return;
+        const json = await res.json();
+        const p = json.data || {};
+        if (p.theme) document.getElementById('prefTheme').value = p.theme;
+        if (p.page_size) document.getElementById('prefPageSize').value = p.page_size;
+        if (p.date_preset) document.getElementById('prefDatePreset').value = p.date_preset;
+    } catch (e) {
+        console.error('Error loading preferences:', e);
+    }
+}
+document.addEventListener('DOMContentLoaded', loadPreferences);
+
+document.getElementById('formUserPreferences').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSavePreferences');
+    const theme = document.getElementById('prefTheme').value;
+    const pageSize = parseInt(document.getElementById('prefPageSize').value, 10);
+    const datePreset = document.getElementById('prefDatePreset').value;
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        const res = await fetch('/api/user/preferences', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                theme: theme,
+                page_size: pageSize,
+                date_preset: datePreset
+            })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            showAlert('User preferences saved successfully!', 'success');
+            if (typeof applyTheme === 'function') {
+                applyTheme(theme);
+            }
+        } else {
+            showAlert(data.message || data.error || 'Failed to save preferences.', 'danger');
+        }
+    } catch (err) {
+        showAlert('Network error while saving preferences.', 'danger');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check2 me-1"></i> Save Preferences';
+    }
+});
+</script>
+{% endblock %}

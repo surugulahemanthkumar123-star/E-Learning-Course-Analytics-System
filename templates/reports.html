@@ -16,12 +16,12 @@
     <div class="analytics-card border-primary">
         <div class="analytics-card-header bg-primary-subtle text-primary">
             <h5 class="analytics-card-title mb-0">
-                <i class="bi bi-images"></i> Matplotlib Generated Figures
+                <i class="bi bi-images"></i> Matplotlib Generated Figures (Publication-Ready)
             </h5>
             <small id="chartTimestamp" class="text-muted"></small>
         </div>
         <div class="analytics-card-body">
-            <div class="row g-3">
+            <div class="row g-4">
                 <div class="col-12 col-lg-6 text-center">
                     <h6 class="fw-bold mb-2">Figure 1: Course Completion Distribution</h6>
                     <img id="imgCompletionChart" class="img-fluid rounded border shadow-sm" alt="Course Completion Bar Chart">
@@ -29,6 +29,14 @@
                 <div class="col-12 col-lg-6 text-center">
                     <h6 class="fw-bold mb-2">Figure 2: Weekly Activity Chronological Trend</h6>
                     <img id="imgWeeklyChart" class="img-fluid rounded border shadow-sm" alt="Weekly Activity Trend Line Chart">
+                </div>
+                <div class="col-12 col-lg-6 text-center">
+                    <h6 class="fw-bold mb-2">Figure 3: Activity Type Distribution</h6>
+                    <img id="imgActivityTypeChart" class="img-fluid rounded border shadow-sm" alt="Activity Type Distribution Pie Chart">
+                </div>
+                <div class="col-12 col-lg-6 text-center">
+                    <h6 class="fw-bold mb-2">Figure 4: Course Engagement Comparison</h6>
+                    <img id="imgEngagementChart" class="img-fluid rounded border shadow-sm" alt="Course Engagement Comparison Bar Chart">
                 </div>
             </div>
         </div>
@@ -47,6 +55,16 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="tab-comparison" data-bs-toggle="pill" data-bs-target="#content-comparison" type="button" role="tab">
                     <i class="bi bi-table me-1"></i> Course Comparison
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-learner-perf" data-bs-toggle="pill" data-bs-target="#content-learner-perf" type="button" role="tab">
+                    <i class="bi bi-person-lines-fill me-1"></i> Learner Performance
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-activity-part" data-bs-toggle="pill" data-bs-target="#content-activity-part" type="button" role="tab">
+                    <i class="bi bi-pie-chart me-1"></i> Activity Participation
                 </button>
             </li>
             <li class="nav-item" role="presentation">
@@ -71,9 +89,18 @@
                         <h6 class="fw-bold mb-0 text-navy">Course Completion Rates &amp; Enrollment Distribution</h6>
                         <small class="text-muted">Formula: (Completed Enrollments / Total Enrollments) &times; 100</small>
                     </div>
-                    <a href="/api/reports/course-completion.csv" class="btn btn-success btn-sm">
-                        <i class="bi bi-download me-1"></i> Export to CSV
-                    </a>
+                    <div class="dropdown">
+                        <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-download me-1"></i> Export Report
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item" href="/api/reports/course-completion.csv"><i class="bi bi-filetype-csv text-success me-2"></i> CSV Spreadsheet</a></li>
+                            <li><a class="dropdown-item" href="/api/reports/course-completion.json" target="_blank"><i class="bi bi-filetype-json text-warning me-2"></i> JSON Data</a></li>
+                            <li><a class="dropdown-item" href="/api/reports/course-completion.pdf" target="_blank"><i class="bi bi-file-earmark-pdf text-danger me-2"></i> PDF Document</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/reports/printable/course-completion" target="_blank"><i class="bi bi-printer text-primary me-2"></i> Printable View</a></li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table custom-table table-hover align-middle">
@@ -102,9 +129,18 @@
                         <h6 class="fw-bold mb-0 text-navy">Comprehensive Course Performance Comparison</h6>
                         <small class="text-muted">Calculates total activity volume and student engagement intensity.</small>
                     </div>
-                    <a href="/api/reports/course-comparison.csv" class="btn btn-success btn-sm">
-                        <i class="bi bi-download me-1"></i> Export to CSV
-                    </a>
+                    <div class="dropdown">
+                        <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-download me-1"></i> Export Report
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item" href="/api/reports/course-comparison.csv"><i class="bi bi-filetype-csv text-success me-2"></i> CSV Spreadsheet</a></li>
+                            <li><a class="dropdown-item" href="/api/reports/course-comparison.json" target="_blank"><i class="bi bi-filetype-json text-warning me-2"></i> JSON Data</a></li>
+                            <li><a class="dropdown-item" href="/api/reports/course-comparison.pdf" target="_blank"><i class="bi bi-file-earmark-pdf text-danger me-2"></i> PDF Document</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/reports/printable/course-comparison" target="_blank"><i class="bi bi-printer text-primary me-2"></i> Printable View</a></li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table custom-table table-hover align-middle">
@@ -127,7 +163,97 @@
                 </div>
             </div>
 
-            <!-- 3. Weekly Activity Tab -->
+            <!-- 3. Learner Performance Tab -->
+            <div class="tab-pane fade" id="content-learner-perf" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-navy">Individual Learner Performance &amp; Progress Analytics</h6>
+                        <small class="text-muted">Calculates course completion rates, active status, scores, and study time per student.</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="text" id="reportLearnerSearch" class="form-control form-control-sm" placeholder="Search roll no / name..." style="width: 180px;">
+                        <select id="reportLearnerDept" class="form-select form-select-sm" style="width: 150px;">
+                            <option value="">All Departments</option>
+                        </select>
+                        <button class="btn btn-outline-secondary btn-sm" id="btnFilterLearnerReport"><i class="bi bi-funnel"></i></button>
+                        <div class="dropdown">
+                            <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-download me-1"></i> Export
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li><a class="dropdown-item" id="btnExportLearnerCsv" href="/api/reports/learner-performance.csv"><i class="bi bi-filetype-csv text-success me-2"></i> CSV Spreadsheet</a></li>
+                                <li><a class="dropdown-item" id="btnExportLearnerJson" href="/api/reports/learner-performance.json" target="_blank"><i class="bi bi-filetype-json text-warning me-2"></i> JSON Data</a></li>
+                                <li><a class="dropdown-item" id="btnExportLearnerPdf" href="/api/reports/learner-performance.pdf" target="_blank"><i class="bi bi-file-earmark-pdf text-danger me-2"></i> PDF Document</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" id="btnExportLearnerPrint" href="/reports/printable/learner-performance" target="_blank"><i class="bi bi-printer text-primary me-2"></i> Printable View</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table custom-table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Learner</th>
+                                <th>Department</th>
+                                <th class="text-center">Enrolled</th>
+                                <th class="text-center">Completed</th>
+                                <th>Completion Rate</th>
+                                <th class="text-center">Activities</th>
+                                <th class="text-center">Avg Score</th>
+                                <th class="text-center">Time Spent</th>
+                                <th>Last Active</th>
+                                <th class="text-center">Academic Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyReportLearnerPerf">
+                            <tr><td colspan="10" class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Loading learner performance...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 4. Activity Participation Breakdown Tab -->
+            <div class="tab-pane fade" id="content-activity-part" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-navy">Activity Participation &amp; Completion Breakdown by Type</h6>
+                        <small class="text-muted">Aggregates assignments, quizzes, video lectures, and readings across the platform.</small>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-download me-1"></i> Export Report
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item" href="/api/reports/activity-participation.csv"><i class="bi bi-filetype-csv text-success me-2"></i> CSV Spreadsheet</a></li>
+                            <li><a class="dropdown-item" href="/api/reports/activity-participation.json" target="_blank"><i class="bi bi-filetype-json text-warning me-2"></i> JSON Data</a></li>
+                            <li><a class="dropdown-item" href="/api/reports/activity-participation.pdf" target="_blank"><i class="bi bi-file-earmark-pdf text-danger me-2"></i> PDF Document</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/reports/printable/activity-participation" target="_blank"><i class="bi bi-printer text-primary me-2"></i> Printable View</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table custom-table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Activity Type</th>
+                                <th class="text-center">Total Activities</th>
+                                <th class="text-center">Completed</th>
+                                <th>Completion Rate</th>
+                                <th class="text-center">Avg Score</th>
+                                <th class="text-center">Total Duration</th>
+                                <th class="text-center">Relative Share</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyReportActivityPart">
+                            <tr><td colspan="7" class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Loading activity breakdown...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 5. Weekly Activity Tab -->
             <div class="tab-pane fade" id="content-weekly" role="tabpanel">
                 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                     <div>
@@ -138,9 +264,18 @@
                         <input type="date" id="reportWeeklyStart" class="form-control form-control-sm" style="width: 135px;" title="Filter Start Date">
                         <input type="date" id="reportWeeklyEnd" class="form-control form-control-sm" style="width: 135px;" title="Filter End Date">
                         <button class="btn btn-outline-secondary btn-sm" id="btnFilterWeeklyReport"><i class="bi bi-funnel"></i></button>
-                        <a href="/api/reports/weekly-activity.csv" id="btnExportWeeklyCsv" class="btn btn-success btn-sm">
-                            <i class="bi bi-download me-1"></i> Export to CSV
-                        </a>
+                        <div class="dropdown">
+                            <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-download me-1"></i> Export
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li><a class="dropdown-item" id="btnExportWeeklyCsv" href="/api/reports/weekly-activity.csv"><i class="bi bi-filetype-csv text-success me-2"></i> CSV Spreadsheet</a></li>
+                                <li><a class="dropdown-item" id="btnExportWeeklyJson" href="/api/reports/weekly-activity.json" target="_blank"><i class="bi bi-filetype-json text-warning me-2"></i> JSON Data</a></li>
+                                <li><a class="dropdown-item" id="btnExportWeeklyPdf" href="/api/reports/weekly-activity.pdf" target="_blank"><i class="bi bi-file-earmark-pdf text-danger me-2"></i> PDF Document</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" id="btnExportWeeklyPrint" href="/reports/printable/weekly-activity" target="_blank"><i class="bi bi-printer text-primary me-2"></i> Printable View</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
                 <div class="table-responsive">
@@ -173,9 +308,18 @@
                         <label class="small text-muted mb-0">Threshold:</label>
                         <input type="number" id="reportInactiveThreshold" class="form-control form-control-sm" style="width: 75px;" value="14" min="1" max="365">
                         <button class="btn btn-outline-secondary btn-sm" id="btnFilterInactiveReport">Apply</button>
-                        <a href="/api/reports/inactive-enrollments.csv" id="btnExportInactiveCsv" class="btn btn-success btn-sm">
-                            <i class="bi bi-download me-1"></i> Export to CSV
-                        </a>
+                        <div class="dropdown">
+                            <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-download me-1"></i> Export
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li><a class="dropdown-item" id="btnExportInactiveCsv" href="/api/reports/inactive-enrollments.csv"><i class="bi bi-filetype-csv text-success me-2"></i> CSV Spreadsheet</a></li>
+                                <li><a class="dropdown-item" id="btnExportInactiveJson" href="/api/reports/inactive-enrollments.json" target="_blank"><i class="bi bi-filetype-json text-warning me-2"></i> JSON Data</a></li>
+                                <li><a class="dropdown-item" id="btnExportInactivePdf" href="/api/reports/inactive-enrollments.pdf" target="_blank"><i class="bi bi-file-earmark-pdf text-danger me-2"></i> PDF Document</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" id="btnExportInactivePrint" href="/reports/printable/inactive-enrollments" target="_blank"><i class="bi bi-printer text-primary me-2"></i> Printable View</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
                 <div class="table-responsive">
@@ -205,5 +349,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/reports.js') }}?v=4.0"></script>
+<script src="{{ url_for('static', filename='js/reports.js') }}?v=6.0"></script>
 {% endblock %}
