@@ -30,3 +30,7 @@ exports/*.csv
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# PowerPoint files
+*.ppt
+*.pptx
